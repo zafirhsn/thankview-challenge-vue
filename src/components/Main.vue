@@ -7,7 +7,7 @@
           <h1 class="header">ThankView Walkthrough</h1>
           <p class="total-length">Total: {{totalVideoLength}}</p>
           <!-- Use a v-for to render -->
-          <div class="list" v-for="(video, index) of videoData" :key=index @click="playVideo(video)">
+          <div class="list" v-for="(video, index) of videoData" :key=index :id=index @click="playVideo(video, index)">
             <span class="index"> {{index}}. </span>
             <span class="title"> {{video.title}}</span>
             <span class="length"> {{video.minutes}}m {{video.seconds}}s </span>
@@ -33,32 +33,96 @@
       }
     },
     methods: {
-      test() {
-        console.log("test")
+      test(event) {
+        console.log(event)
+        console.log(event.target.currentSrc);
+
+        let url = event.target.currentSrc
+
+
+        /* 
+        This is a mess of copy and paste from below! Had to finish this in 3 minutes!
+        
+        */
+        for (let i = 0; i < this.videoData.length; i++) {
+          if (this.videoData[i].url === url) {
+            if (i === this.videoData.length - 1) {
+              let currentVideo = document.getElementById("selected-video");
+
+              let nextVideo = `
+                <video controls width="100%" poster="${this.videoData[0].thumb}">
+                  <source src="${this.videoData[0].url}" type="video/mp4">
+                </video>`
+
+              currentVideo.innerHTML = nextVideo;
+
+              let lastActive = document.getElementsByClassName("list active")
+              console.log(lastActive)
+              if (lastActive.length) {
+                lastActive[0].classList.remove("active");
+              }
+              // Add active class to selected video
+              let selectedList = document.getElementById(`${0}`);
+              selectedList.classList.add("active")
+            } else {
+              let currentVideo = document.getElementById("selected-video");
+
+              let nextVideo = `
+                <video controls width="100%" poster="${this.videoData[i+1].thumb}">
+                  <source src="${this.videoData[i+1].url}" type="video/mp4">
+                </video>`
+              currentVideo.innerHTML = nextVideo;
+              currentVideo.getElementsByTagName("video")[0].play();
+
+              let lastActive = document.getElementsByClassName("list active")
+              console.log(lastActive)
+              if (lastActive.length) {
+                lastActive[0].classList.remove("active");
+              }
+              // Add active class to selected video
+              let selectedList = document.getElementById(`${i+1}`);
+              selectedList.classList.add("active")
+            }
+          }
+        }
+
       },
-      playVideo(video) {
+      playVideo(video, index) {
         console.log(video.url);
 
         /* 
           1. Use video URL and thumb to play the selected video
         */  
 
-       let currentVideo = document.getElementById("selected-video");
+      // Remove last active class
+      let lastActive = document.getElementsByClassName("list active")
+      console.log(lastActive)
+      if (lastActive.length) {
+        lastActive[0].classList.remove("active");
+      }
 
-        let nextVideo = `
-          <video controls width="100%" poster="${video.thumb}">
-            <source src="${video.url}" type="video/mp4">
-          </video>`
+      // Add active class to selected video
+      let selectedList = document.getElementById(`${index}`);
+      selectedList.classList.add("active")
 
-        if (nextVideo === currentVideo.innerHTML) {
-          return;
-        }
-       currentVideo.innerHTML = nextVideo;
-       currentVideo.classList.add("active")
-       console.log(currentVideo.getElementsByTagName("video")[0].play());
-       currentVideo.getElementsByTagName("video")[0].addEventListener('ended', ()=> {
-         this.test();
-       })
+
+      // Get video container
+      let currentVideo = document.getElementById("selected-video");
+
+      let nextVideo = `
+        <video controls width="100%" poster="${video.thumb}">
+          <source src="${video.url}" type="video/mp4">
+        </video>`
+
+      if (nextVideo === currentVideo.innerHTML) {
+        return;
+      }
+      currentVideo.innerHTML = nextVideo;
+      console.log(currentVideo.classList);
+      currentVideo.getElementsByTagName("video")[0].play();
+      currentVideo.getElementsByTagName("video")[0].addEventListener('ended', (event)=> {
+        this.test(event);
+      })
 
 
       }
@@ -185,7 +249,7 @@
     padding-top: 20px;
     padding-bottom: 20px;
     padding-right: 20px;
- 
+
     &.active {
       background-color: #d4e2fe;
     }
